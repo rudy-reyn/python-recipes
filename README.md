@@ -3,10 +3,9 @@
 ## Overview
 
 This package includes various potentially useful miscellaneous functions and classes, including:
-
-    * Anonymous types
-    * Function signature guards
-    * Static function signatures
+  * Anonymous types
+  * Function signature guards
+  * Static function signatures
 
 ## Examples
 
