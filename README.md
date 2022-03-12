@@ -41,7 +41,16 @@ This package includes various potentially useful miscellaneous functions and cla
 ...    return factorial(n - 1, n * a)
 
 >>> factorial(-1)       # raises ValueError
->>> factorial(10, 0)   # raises ValueError
+>>> factorial(10, 0)    # raises ValueError
+
+# Ellipsis can be used as a wildcard
+>>> @guard(lambda a: a != 0, ..., lamnda c: c != 0):
+>>> def adder(a, b, c):
+...     return a + b + c
+
+>>> adder(1, 0, 2)
+3
+
 
 ```
 ### recipes.typed
@@ -55,14 +64,14 @@ This package includes various potentially useful miscellaneous functions and cla
 ...        return a
 ...    return factorial(n - 1, n * a)
 
->>> factorial(-1.0)       # raises TypeError
+>>> factorial(-1.0)        # raises TypeError
 
->>> @typed(int | float, a=int)
->>> def factorial(n, a=1):
-...    if n <= 0:
-...        return a
-...    return factorial(n - 1, n * a)
+>>> @typed(int | float, ..., str)
+>>> def display_pair(a, b):
+...    print(a, b)
 
->>> factorial(-1.0)       # returns 1
-1
+>>> display_pair(1, "2", "3")
+1 2 3
+
+>>> display_pair(1, 2, 3) # raises TypeError
 ```
