@@ -2,7 +2,7 @@
 # typed.py
 from .. import Guard
 from types import UnionType
-from typing import _UnionGenericAlias as _UnionGenericAlias
+from typing import _UnionGenericAlias
 from functools import wraps
 
 
