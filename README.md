@@ -3,6 +3,7 @@
 ## Overview
 
 This package includes various potentially useful miscellaneous functions and classes, including:
+
     * Anonymous types
     * Function signature guards
     * Static function signatures
@@ -40,8 +41,8 @@ This package includes various potentially useful miscellaneous functions and cla
 ...        return a
 ...    return factorial(n - 1, n * a)
 
->>> factorial(-1)       # raise ValueError
->>> factorial(10, 0)   # raise ValueError
+>>> factorial(-1)       # raises ValueError
+>>> factorial(10, 0)   # raises ValueError
 
 ```
 ### recipes.typed
@@ -55,7 +56,7 @@ This package includes various potentially useful miscellaneous functions and cla
 ...        return a
 ...    return factorial(n - 1, n * a)
 
->>> factorial(-1.0)       # raise TypeError
+>>> factorial(-1.0)       # raises TypeError
 
 >>> @typed(int | float, a=int)
 >>> def factorial(n, a=1):
