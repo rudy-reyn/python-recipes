@@ -1,10 +1,9 @@
 # 03/10/22
 # typed.py
-from .. import Guard
+from .guards import Guard
 from types import UnionType
 from typing import _UnionGenericAlias
 from functools import wraps
-
 
 class ArgTypeGuard:
     def __init__(self, grd):
