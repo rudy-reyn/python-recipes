@@ -6,8 +6,53 @@ This package includes various potentially useful miscellaneous functions and cla
   * Anonymous types
   * Function signature guards
   * Static function signatures
+  * Function pipes
 
 ## Examples
+
+### recipes.pipefunc
+```python3
+>>> from recipes import pipefunc
+
+>>> @pipefunc
+>>> def factorial(n, a=1):
+...     if n <= 0:
+...         return a
+...     return factorial(n - 1, n * a)
+
+>>> factorial(5)
+120
+
+>>> 5 | factorial
+120
+```
+
+In addition to standard pipes, different operators can be used to unpack arguments.
+These are the most useful when piping the output of another function rather than being used
+directly.
+  * `|`  passes the left value as a single argument as `func(arg)`
+  * `>>` unpacks the left value as `func(*args)`
+  * `&`  unpacks the left value as `func(**kwargs)`
+  * `/`  passes the left value as `func(*args, **kwargs)` if args is an iterable, otherwise as `func(args, **kwargs)`. Note that this includes strings.
+  * `//` passes the left value as `func(*args, **kwargs)` regardless of arg type
+  * `%`  passes the left value as `func(args, **kwargs)` regardless of arg type
+
+```python3
+>>> (5, ) >> factorial
+120
+>>> {"n": 5, "a": 1} & factorial
+120
+>>> (5, {"a": 1}) / factorial
+120
+>>> (5, {"a": 1}) // factorial
+TypeError: cannot unpack non-iterable int object
+>>> ((5, ), {"a": 1}) // factorial
+120
+>>> ((5, ), {}) % factorial
+TypeError: '<=' not supported between instances of 'tuple' and 'int'
+>>> (5, {}) % factorial
+120
+```
 
 ### recipes.tuples
 ```python3
