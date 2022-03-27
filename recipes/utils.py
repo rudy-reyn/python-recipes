@@ -1,7 +1,5 @@
-#!/usr/bin/env python3
 # 03/26/22
 # utils.py
-# rudy@recipes
 
 def singleton(cls):
     cls.new = cls
