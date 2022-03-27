@@ -1,11 +1,12 @@
 # 03/23/22
 # infix.py
 from __future__ import annotations
+import inspect
 from abc import ABC, abstractmethod
 from typing import Callable, Literal, overload, TypeVar
 from .utils import Nil
 
-__all__ = "Infix", "infix"
+__all__ = "Infix", "infix", "BaseInfix"
 
 Operator = Literal['&', '|', '^', '+', '-', '*', '@', '/', '//', '%', '<<', '>>']
 NewInfix = TypeVar("NewInfix", bound="BaseInfix")
@@ -70,15 +71,20 @@ class BaseInfix(ABC):
 
         def left_infix(self, other):
             if self.left_bind is not Nil:
+                bind, self.left_bind = self.left_bind, Nil
+                self.right_bind = Nil
                 raise AttributeError(f"left hand argument is already bound")
             if self.right_bind is Nil:
                 self.left_bind = other
                 return self
-            argument, self.right_bind = self.right_bind, Nil
+            argument = self.right_bind
+            self.right_bind = Nil
             return self(argument, other)
 
         def right_infix(self, other):
             if self.right_bind is not Nil:
+                bind, self.right_bind = self.right_bind, Nil
+                self.left_bind = Nil
                 raise AttributeError(f"right hand argument is already bound")
             if self.left_bind is Nil:
                 self.right_bind = other
@@ -86,10 +92,38 @@ class BaseInfix(ABC):
             argument, self.left_bind = self.left_bind, Nil
             return self(argument, other)
 
+        def invoked_invalid_operation(self, value):
+            """Ensures that each argument binding is cleared
+            in case an unsupported arithmetic operator is performed.
+
+            This is important to handled exceptions do not cause any unwanted side effects.
+            """
+            # TODO: add additional traceback info
+            self.left_bind = Nil
+            self.right_bind = Nil
+            raise TypeError("unsupported operation")
+
         # right and left methods are switched due to operator precedence
+        for meth in operators.values():
+            def func(self, value):
+                return invoked_invalid_operation(self, value)
+            func.__name__ = f"__{meth}__"
+            from functools import wraps
+            setattr(cls, f"__{meth}__", wraps(func)(func))
         setattr(cls, f"__r{method}__", left_infix)
         setattr(cls, f"__{right_method}__", right_infix)
 
+        cls.__doc__ = f"""Subclass of BaseInfix used to create infix functions.
+        Examples:
+            >>> @<infix factory>
+            >>> def divides(a, b):
+            ...     return b % a == 0
+            ...
+            >>> 3 {cls.operator()}divides{cls.right_operator()} 9
+            True
+
+        Unsupported operators will always raise an exception.
+        """
     def __call__(self, x, y):
         return self.function(x, y)
 
@@ -126,38 +160,38 @@ def new_infix(operator: Operator, right_operator: Operator | None=None) -> NewIn
     )
 
 @overload
-def infix(func: Operator, /, op: None, *, rop: Operator | None) -> type[NewInfix]: ...
+def infixed(func: Operator, /, op: None, *, rop: Operator | None) -> type[NewInfix]: ...
 
 @overload
-def infix(func: None, /, op: Operator | None, *, rop: Operator | None) -> type[NewInfix]: ...
+def infixed(func: None, /, op: Operator | None, *, rop: Operator | None) -> type[NewInfix]: ...
 
 @overload
-def infix(func: Callable, /, op: Operator | None, *, rop: Operator | None) -> NewInfix: ...
+def infixed(func: Callable, /, op: Operator | None, *, rop: Operator | None) -> NewInfix: ...
 
-def infix(func=None, /, operator: Operator | None=None, *, right_operator: Operator | None=None):
+def infixed(func=None, /, operator: Operator | None=None, *, right_operator: Operator | None=None):
     """Helper function for dynamically creating Infixed functions without having to directly
     subclass BaseInfix.
 
-    Can be used as a decorator using '@infix' or an operator can be specified
-    with '@infix(<operator>)'. It may also be called directly using
-    'infix(<func>, operator=<operator>, r)'. Returns a new Infix class with
+    Can be used as a decorator using '@infixed' or an operator can be specified
+    with '@infixed(<operator>)'. It may also be called directly using
+    'infixed(<func>, operator=<operator>)'. Returns a new Infix class with
     the operator methods defined.
 
     Examples:
-        >>> @infix
+        >>> @infixed
         >>> def divides(a, b):
         ...     return b % a == 0
         ...
         >>> 10 |divides| 100
         True
-        >>> @infix('+')
+        >>> @infixed('+')
         >>> def strcat(x, y):
         ...     return  str(x) + str(y)
         ...
         >>> 1 +strcat+ 2
         '12'
         >>>
-        >>> Infix = infix("|")
+        >>> Infix = infixed("|")
         >>>
         >>> @Infix
         >>> def tee(content, filename):
@@ -180,10 +214,12 @@ def infix(func=None, /, operator: Operator | None=None, *, right_operator: Opera
             return new_infix(func, right_operator)
         case None, str(_), str(_):
             return new_infix(operator, right_operator)
+        case None, str(_), None:
+            return new_infix(operator, operator)
         case _, None, None:
             return new_infix("|", "|")(func)
-        case _, str(_), str(_):
+        case _, str(_), _:
             return new_infix(operator, right_operator)(func)
-    raise ValueError(infix.__doc__)
+    raise ValueError(f"{type(func)}, {type(operator)}, {type(right_operator)}")
 
 Infix = new_infix("|")
