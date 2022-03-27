@@ -10,6 +10,37 @@ This package includes various potentially useful miscellaneous functions and cla
 
 ## Examples
 
+## recipes.infix
+Includes `infixed` function factory for creating infixed functions.
+These can be used to create pseudo binary operators.
+
+```python3
+>>> @infixed
+>>> def divides(a, b):
+...     return b % a == 0
+...
+>>> 10 |divides| 100
+True
+>>> @infixed('+')
+>>> def strcat(x, y):
+...     return  str(x) + str(y)
+...
+>>> 1 +strcat+ 2
+'12'
+>>>
+>>> Infix = infixed("|")
+>>>
+>>> @Infix
+>>> def tee(content, filename):
+...     print(content)
+...     with open(filename, "wb+") as file:
+...         bytes_written = file.write(content)
+...     return bytes_written
+...
+>>> bytes_written = 'Hello, World!' |tee| "filename.txt"
+Hello, World!
+```
+
 ### recipes.pipefunc
 ```python3
 >>> from recipes import pipefunc
