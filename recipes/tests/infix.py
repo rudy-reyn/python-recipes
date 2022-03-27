@@ -1,7 +1,5 @@
-#!/usr/bin/env python3
 # 03/27/22
 # tests/infix.py
-# rudy@recipes
 from typing import Iterable
 from abc import ABC
 import pytest
