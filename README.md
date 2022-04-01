@@ -3,14 +3,14 @@
 ## Overview
 
 This package includes various potentially useful miscellaneous functions and classes, including:
-  * Anonymous types
-  * Variable guards
   * Infix operators
+  * Variable guards
   * Function pipes
+  * Anonymous types
 
 ## Examples
 
-## infix
+## Infix function operators
 Includes `infixed` function factory for creating infixed functions.
 These can be used to create pseudo binary operators.
 
@@ -41,7 +41,7 @@ True
 Hello, World!
 ```
 
-### guards
+### Variable guards
 ```python3
 >>> from recipes import guard
 >>>
@@ -62,7 +62,7 @@ Guards can also accept types
 ValueError("Value does not pass guard")
 ```
 
-### pipefunc
+### Pipe functions
 ```python3
 >>> from recipes import pipefunc
 
@@ -79,7 +79,7 @@ ValueError("Value does not pass guard")
 120
 ```
 
-### tuples
+### Anonymous tuples
 ```python3
 >>> from recipes import Tuple
 
