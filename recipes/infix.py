@@ -160,13 +160,16 @@ def new_infix(operator: Operator, right_operator: Operator | None=None) -> NewIn
     )
 
 @overload
-def infixed(func: Operator, /, op: None, *, rop: Operator | None) -> type[NewInfix]: ...
+def infixed(func: Operator, /, operator: None, *,
+        right_operator: Operator | None) -> type[NewInfix]: ...
 
 @overload
-def infixed(func: None, /, op: Operator | None, *, rop: Operator | None) -> type[NewInfix]: ...
+def infixed(func: None, /, operator: Operator | None, *,
+        right_operator: Operator | None) -> type[NewInfix]: ...
 
 @overload
-def infixed(func: Callable, /, op: Operator | None, *, rop: Operator | None) -> NewInfix: ...
+def infixed(func: Callable, /, operator: Operator | None, *,
+        right_operator: Operator | None) -> NewInfix: ...
 
 def infixed(func=None, /, operator: Operator | None=None, *, right_operator: Operator | None=None):
     """Helper function for dynamically creating Infixed functions without having to directly
@@ -222,4 +225,4 @@ def infixed(func=None, /, operator: Operator | None=None, *, right_operator: Ope
             return new_infix(operator, right_operator)(func)
     raise ValueError(f"{type(func)}, {type(operator)}, {type(right_operator)}")
 
-Infix = new_infix("|")
+Infix: NewInfix = new_infix("|")

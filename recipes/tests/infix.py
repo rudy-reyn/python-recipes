@@ -109,14 +109,6 @@ def test_infix_operators_kwargs():
     assert 1 &xor| 0
     assert not 1 &xor| 1
 
-def test_infix_operators_kwargs():
-    @infixed(operator="&", right_operator="|")
-    def xor(x, y):
-        return bool(x) ^ bool(y)
-
-    assert 1 &xor| 0
-    assert not 1 &xor| 1
-
 def test_infix():
     @infixed("<<", right_operator=">>")
     def O(a, b):
