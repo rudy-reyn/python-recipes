@@ -1,0 +1,203 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>recipes.guards &#8212; recipes  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for recipes.guards</h1><div class="highlight"><pre>
+<span></span><span class="c1"># 04/01/22</span>
+<span class="c1"># guards.py</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">overload</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Callable</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="s2">&quot;BaseGuard&quot;</span><span class="p">,</span> <span class="s2">&quot;Guard&quot;</span><span class="p">,</span> <span class="s2">&quot;PartialGuard&quot;</span><span class="p">,</span> <span class="s2">&quot;guard&quot;</span>
+
+<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">)</span>
+
+<span class="n">GuardFunction</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">T</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">valid_classinfo</span><span class="p">(</span><span class="n">classinfo</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="nb">isinstance</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">classinfo</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="BaseGuard"><a class="viewcode-back" href="../../recipes.html#recipes.guards.BaseGuard">[docs]</a><span class="k">class</span> <span class="nc">BaseGuard</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Abstract base class for creating guards.</span>
+
+<span class="sd">    Provides guard property method used to validate given values.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="s2">&quot;_guard&quot;</span>
+
+<div class="viewcode-block" id="BaseGuard.__init__"><a class="viewcode-back" href="../../recipes.html#recipes.guards.BaseGuard.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">guard</span><span class="p">:</span> <span class="n">GuardFunction</span> <span class="o">|</span> <span class="kc">None</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># done to keep mypy happy, but isn&#39;t actually necessary</span>
+        <span class="k">if</span> <span class="n">guard</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">guard</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">guard</span> <span class="o">=</span> <span class="n">guard</span></div>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">guard</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">guard</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GuardFunction</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">guard</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_guard</span> <span class="c1"># ensures self._guard wasn&#39;t changed.</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_guard</span>
+
+    <span class="nd">@guard</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">guard</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">guard</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">guard</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_guard</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">value</span><span class="p">:</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="n">valid_classinfo</span><span class="p">(</span><span class="n">guard</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_guard</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">value</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">guard</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">callable</span><span class="p">(</span><span class="n">guard</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_guard</span> <span class="o">=</span> <span class="n">guard</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s2">&quot;Guard must be None, a type, UnionType, tuple of types, or other callable object&quot;</span>
+            <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Guard"><a class="viewcode-back" href="../../recipes.html#recipes.guards.Guard">[docs]</a><span class="k">class</span> <span class="nc">Guard</span><span class="p">(</span><span class="n">BaseGuard</span><span class="p">):</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="s2">&quot;_guard&quot;</span><span class="p">,</span> <span class="s2">&quot;_value&quot;</span>
+
+<div class="viewcode-block" id="Guard.__init__"><a class="viewcode-back" href="../../recipes.html#recipes.guards.Guard.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">guard</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">guard</span> <span class="o">=</span> <span class="n">guard</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span></div>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Guard</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">guard</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value</span>
+
+    <span class="nd">@value</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">guard</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">guard</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Value does not pass guard&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="o">=</span> <span class="n">value</span></div>
+
+<div class="viewcode-block" id="PartialGuard"><a class="viewcode-back" href="../../recipes.html#recipes.guards.PartialGuard">[docs]</a><span class="k">class</span> <span class="nc">PartialGuard</span><span class="p">(</span><span class="n">BaseGuard</span><span class="p">):</span>
+    <span class="s2">&quot;Used to provide a __ror__ method for alternative guard construction.&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="s2">&quot;_guard&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Guard</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Guard</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">guard</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__ror__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Guard</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">guard</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">GuardFunction</span><span class="p">,</span> <span class="n">guard</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">None</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">PartialGuard</span><span class="p">:</span>
+    <span class="o">...</span>
+
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">guard</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">guard</span><span class="p">:</span> <span class="n">GuardFunction</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Guard</span><span class="p">:</span>
+    <span class="o">...</span>
+
+<div class="viewcode-block" id="guard"><a class="viewcode-back" href="../../recipes.html#recipes.guards.guard">[docs]</a><span class="k">def</span> <span class="nf">guard</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">guard</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PartialGuard</span> <span class="o">|</span> <span class="n">Guard</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;A generic helper function for creating guards.</span>
+
+<span class="sd">    If the value is meant to be a literal callable without a guard,</span>
+<span class="sd">    then Guard or PartialGuard should be called directly instead.&quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">callable</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">or</span> <span class="n">valid_classinfo</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">and</span> <span class="n">guard</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">PartialGuard</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Guard</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">guard</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">recipes</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../recipes.html">recipes package</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Python Recipes.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,236 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>recipes.tests.recipes &#8212; recipes  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for recipes.tests.recipes</h1><div class="highlight"><pre>
+<span></span><span class="c1"># 04/02/22</span>
+<span class="c1"># recipes.py</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">pytest</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">pipefunc</span><span class="p">,</span> <span class="n">curry</span>
+
+<div class="viewcode-block" id="factorial"><a class="viewcode-back" href="../../../recipes.tests.html#recipes.tests.recipes.factorial">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span> <span class="nf">factorial</span><span class="p">():</span>
+    <span class="nd">@pipefunc</span>
+    <span class="k">def</span> <span class="nf">factorial</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">a</span>
+        <span class="k">return</span> <span class="n">factorial</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n</span> <span class="o">*</span> <span class="n">a</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">factorial</span></div>
+
+<div class="viewcode-block" id="test_pipefunc"><a class="viewcode-back" href="../../../recipes.tests.html#recipes.tests.recipes.test_pipefunc">[docs]</a><span class="k">def</span> <span class="nf">test_pipefunc</span><span class="p">(</span><span class="n">factorial</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">repr</span><span class="p">(</span><span class="n">factorial</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">factorial</span><span class="p">,</span> <span class="n">pipefunc</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span>
+        <span class="n">pipefunc</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="n">factorial</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="o">==</span> <span class="mi">120</span>
+    <span class="k">assert</span> <span class="n">factorial</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">120</span>
+    <span class="k">assert</span> <span class="n">factorial</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">120</span>
+    <span class="k">assert</span> <span class="n">factorial</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">120</span>
+
+    <span class="c1"># `|` passes the left value as a single argument as `func(arg)`</span>
+    <span class="k">assert</span> <span class="p">(</span><span class="mi">5</span> <span class="o">|</span> <span class="n">factorial</span><span class="p">)</span> <span class="o">==</span> <span class="mi">120</span></div>
+
+<div class="viewcode-block" id="generic_message"><a class="viewcode-back" href="../../../recipes.tests.html#recipes.tests.recipes.generic_message">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span> <span class="nf">generic_message</span><span class="p">():</span>
+    <span class="k">return</span> <span class="sa">r</span><span class="s2">&quot;Could not bind function arguments for .*:&quot;</span></div>
+
+<div class="viewcode-block" id="curry_repr"><a class="viewcode-back" href="../../../recipes.tests.html#recipes.tests.recipes.curry_repr">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span> <span class="nf">curry_repr</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;&lt;curried function &lt;?\w+&gt;? at 0x[a-f0-9]+&gt;&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="curry_helper"><a class="viewcode-back" href="../../../recipes.tests.html#recipes.tests.recipes.curry_helper">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span> <span class="nf">curry_helper</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">helper</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">func</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">curry</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">helper</span></div>
+
+<div class="viewcode-block" id="test_repr"><a class="viewcode-back" href="../../../recipes.tests.html#recipes.tests.recipes.test_repr">[docs]</a><span class="k">def</span> <span class="nf">test_repr</span><span class="p">(</span><span class="n">curry_repr</span><span class="p">):</span>
+    <span class="n">func</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">curry</span><span class="p">(</span><span class="k">lambda</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)))</span>
+
+    <span class="nd">@repr</span>
+    <span class="nd">@curry</span>
+    <span class="k">def</span> <span class="nf">func1</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="o">/</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span>
+
+    <span class="nd">@repr</span>
+    <span class="nd">@curry</span>
+    <span class="k">def</span> <span class="nf">func2</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span>
+
+    <span class="k">assert</span> <span class="n">curry_repr</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">func</span><span class="p">),</span> <span class="n">func</span>
+    <span class="k">assert</span> <span class="n">curry_repr</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">func1</span><span class="p">),</span> <span class="n">func1</span>
+    <span class="k">assert</span> <span class="n">curry_repr</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">func2</span><span class="p">),</span> <span class="n">func2</span></div>
+
+<div class="viewcode-block" id="test_curry"><a class="viewcode-back" href="../../../recipes.tests.html#recipes.tests.recipes.test_curry">[docs]</a><span class="k">def</span> <span class="nf">test_curry</span><span class="p">(</span><span class="n">curry_helper</span><span class="p">):</span>
+    <span class="nd">@curry</span>
+    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span> <span class="o">+</span> <span class="n">c</span>
+
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span>
+        <span class="n">curry</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="n">curry_helper</span><span class="p">(</span><span class="n">add</span><span class="p">),</span> <span class="n">add</span>
+    <span class="k">assert</span> <span class="n">curry_helper</span><span class="p">(</span><span class="n">add</span><span class="p">(</span><span class="mi">1</span><span class="p">)),</span> <span class="n">add</span>
+
+    <span class="k">assert</span> <span class="n">add</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">==</span> <span class="n">add</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)(</span><span class="mi">3</span><span class="p">)</span> <span class="o">==</span> <span class="n">add</span><span class="p">(</span><span class="mi">1</span><span class="p">)(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">==</span> <span class="n">add</span><span class="p">(</span><span class="mi">1</span><span class="p">)(</span><span class="mi">2</span><span class="p">)(</span><span class="mi">3</span><span class="p">)</span> <span class="o">==</span> <span class="n">add</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span> <span class="o">==</span> <span class="mi">6</span>
+
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc_info</span><span class="p">:</span>
+        <span class="n">add</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+    <span class="n">add1</span> <span class="o">=</span> <span class="n">add</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">curry_helper</span><span class="p">(</span><span class="n">add1</span><span class="p">)</span>
+    <span class="n">add3</span> <span class="o">=</span> <span class="n">add1</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">curry_helper</span><span class="p">(</span><span class="n">add3</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">add3</span><span class="p">(</span><span class="n">c</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span> <span class="o">==</span> <span class="mi">6</span></div>
+
+<div class="viewcode-block" id="test_curry_pos_only"><a class="viewcode-back" href="../../../recipes.tests.html#recipes.tests.recipes.test_curry_pos_only">[docs]</a><span class="k">def</span> <span class="nf">test_curry_pos_only</span><span class="p">(</span><span class="n">curry_helper</span><span class="p">,</span> <span class="n">generic_message</span><span class="p">):</span>
+    <span class="nd">@curry</span>
+    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="o">/</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span> <span class="o">+</span> <span class="n">c</span>
+
+    <span class="k">assert</span> <span class="n">curry_helper</span><span class="p">(</span><span class="n">add</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">curry_helper</span><span class="p">(</span><span class="n">add</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+    <span class="k">assert</span> <span class="n">curry_helper</span><span class="p">(</span><span class="n">add</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="k">assert</span> <span class="n">add</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">==</span> <span class="mi">6</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;parameter is positional only, but was passed as a keyword&quot;</span>
+    <span class="n">pos_only_message</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">letter</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">generic_message</span><span class="si">}</span><span class="s2"> &#39;</span><span class="si">{</span><span class="n">letter</span><span class="si">}</span><span class="s2">&#39; </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="n">expected</span> <span class="o">=</span> <span class="n">pos_only_message</span><span class="p">(</span><span class="s2">&quot;c&quot;</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="n">match</span><span class="o">=</span><span class="n">expected</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc_info</span><span class="p">:</span>
+        <span class="n">add</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="n">expected</span> <span class="o">=</span> <span class="n">pos_only_message</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="n">match</span><span class="o">=</span><span class="n">expected</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc_info</span><span class="p">:</span>
+        <span class="n">add</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="n">add1</span> <span class="o">=</span> <span class="n">add</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">curry_helper</span><span class="p">(</span><span class="n">add1</span><span class="p">)</span>
+    <span class="n">add3</span> <span class="o">=</span> <span class="n">add1</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">curry_helper</span><span class="p">(</span><span class="n">add3</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">add3</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">==</span> <span class="mi">6</span></div>
+
+<div class="viewcode-block" id="test_keyword_only"><a class="viewcode-back" href="../../../recipes.tests.html#recipes.tests.recipes.test_keyword_only">[docs]</a><span class="k">def</span> <span class="nf">test_keyword_only</span><span class="p">(</span><span class="n">curry_helper</span><span class="p">,</span> <span class="n">generic_message</span><span class="p">):</span>
+    <span class="nd">@curry</span>
+    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,):</span>
+        <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span> <span class="o">+</span> <span class="n">c</span>
+
+    <span class="k">assert</span> <span class="n">curry_helper</span><span class="p">(</span><span class="n">add</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">curry_helper</span><span class="p">(</span><span class="n">add</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+    <span class="k">assert</span> <span class="n">curry_helper</span><span class="p">(</span><span class="n">add</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+    <span class="k">assert</span> <span class="n">add</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span> <span class="o">==</span> <span class="mi">6</span>
+
+    <span class="n">expected</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">generic_message</span><span class="si">}</span><span class="s2"> too many positional arguments&quot;</span>
+
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="n">match</span><span class="o">=</span><span class="n">expected</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc_info</span><span class="p">:</span>
+        <span class="n">add</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="n">match</span><span class="o">=</span><span class="n">expected</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc_info</span><span class="p">:</span>
+        <span class="n">add</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="n">add1</span> <span class="o">=</span> <span class="n">add</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">curry_helper</span><span class="p">(</span><span class="n">add1</span><span class="p">)</span>
+    <span class="n">add3</span> <span class="o">=</span> <span class="n">add1</span><span class="p">(</span><span class="n">b</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">curry_helper</span><span class="p">(</span><span class="n">add3</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">add3</span><span class="p">(</span><span class="n">c</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span> <span class="o">==</span> <span class="mi">6</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">recipes</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../recipes.html">recipes package</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Python Recipes.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
