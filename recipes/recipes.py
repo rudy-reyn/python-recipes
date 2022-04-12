@@ -69,9 +69,9 @@ class curry(Function):
     >>> def add(a, b, c, d=0):
     ...     return a + b + c
     ...
-    >>> add(5, 15)
+    >>> add20 = add(5, 15)
     <curried function add at 0x{id}>
-    >>> add(100)
+    >>> add20(100)
     120
     """
 
